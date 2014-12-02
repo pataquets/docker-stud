@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Generate default, self signed certificate
+./gencert certs/stud-rsa-self
+
+# Warning: BACKEND_PORT conflicts with Docker links environment vars.
+# TODO: Get all the info automatically from Docker link variables.
+STUD_BACKEND_PORT=${STUD_BACKEND_PORT:-80}
+STUD_BACKEND_HOST=${STUD_BACKEND_HOST:-backend}
+
+STUD_CMD="stud -b ${STUD_BACKEND_HOST},${STUD_BACKEND_PORT} $*"
+echo "Executing '${STUD_CMD}'..."
+exec ${STUD_CMD}

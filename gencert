@@ -1,0 +1,53 @@
+#!/bin/bash
+
+###########################################################################
+###	gencert: Generate certificate script
+###########################################################################
+# TODO:
+# - Generate vaild CSR. Currently only generates self-signed certs.
+# - Support more key algorithms, although DSA seems weaker.
+###########################################################################
+
+# Set a default base file name
+#CERT_KEY_ALGO=${CERT_KEY_ALGO:-RSA}
+CERT_KEY_ALGO="rsa"
+CERT_FILE_NAME=${1:-${CERT_FILE_NAME:-"gencert-${CERT_KEY_ALGO}"}}
+
+# Set default private key parameters
+CERT_KEY_SIZE=${CERT_KEY_SIZE:-4096}
+CERT_KEY_VALIDITY=${CERT_KEY_VALIDITY:-365}
+
+###########################################################################
+### Initialize certificate subject parmeters
+###########################################################################
+# Load extra parameters from configurable defaults file
+CERT_DEFAULTS_FILE=${CERT_DEFAULTS_FILE:-"./gencert-defaults"}
+if [[ -f ${CERT_DEFAULTS_FILE} ]]; then
+	echo "Sourcing '${CERT_DEFAULTS_FILE}' certificate defaults."
+	source ${CERT_DEFAULTS_FILE}
+fi
+
+# Set the host name as the default CN if none present
+CERT_SUBJ_CN=${CERT_SUBJ_CN:-${HOSTNAME}}
+
+# Build the final subject parameters string
+if [[ ! -z ${CERT_SUBJ} ]]; then
+	CERT_SUBJ="/${CERT_SUBJ}"
+fi
+CERT_SUBJ="${CERT_SUBJ}/CN=${CERT_SUBJ_CN}"
+###########################################################################
+
+echo "Generating certificate with subject: ${CERT_SUBJ}"
+openssl req \
+	-batch \
+	-x509 \
+	-new \
+	-newkey ${CERT_KEY_ALGO}:${CERT_KEY_SIZE} \
+	-days ${CERT_KEY_VALIDITY} \
+	-keyout ${CERT_FILE_NAME}.key \
+	-nodes \
+	-subj "${CERT_SUBJ}" \
+	-out ${CERT_FILE_NAME}.crt
+
+echo "Combining key and cert files into ${CERT_FILE_NAME}.pem"
+cat ${CERT_FILE_NAME}.key ${CERT_FILE_NAME}.crt > ${CERT_FILE_NAME}.pem

@@ -1,0 +1,2 @@
+export CERT_SUBJ="C=US/ST=NV/L=Las Vegas/O=ACME"
+export CERT_SUBJ_CN="www.example.com"
