@@ -5,9 +5,9 @@ RUN \
   DEBIAN_FRONTEND=noninteractive \
     apt-get -y install \
       stud \
-    && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/
+  && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/
 
 RUN mkdir -vp /root/certs/
 
